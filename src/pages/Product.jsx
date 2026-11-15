@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { mockProducts } from '../data/products';
 import { useCart } from '../context/CartContext';
@@ -6,114 +6,164 @@ import { useCart } from '../context/CartContext';
 export default function Product() {
   const { id } = useParams(); 
   const [quantity, setQuantity] = useState(1);
-  const [showToast, setShowToast] = useState(false); // State for the popup
+  const [showToast, setShowToast] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   
   const { addToCart, setIsCartOpen } = useCart(); 
   
   const product = mockProducts.find(p => p.id === parseInt(id));
 
+  // Lock body scroll when lightbox is open
+  useEffect(() => {
+    if (isFullscreen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    return () => { document.body.style.overflow = 'auto'; };
+  }, [isFullscreen]);
+
   if (!product) {
     return (
-      <main className="flex-1 flex flex-col items-center justify-center py-20">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Product not found</h2>
-        <Link to="/shop" className="text-blue-600 hover:underline">Return to Shop</Link>
+      <main className="flex-1 flex flex-col items-center justify-center py-32 bg-[#FAF9F6] border-t border-stone-200 w-full">
+        <span className="text-stone-400 font-serif italic text-xl mb-6">Product not found.</span>
+        <Link 
+          to="/shop" 
+          className="text-[11px] uppercase tracking-widest text-stone-900 border-b border-stone-900 pb-1 hover:text-stone-500 hover:border-stone-500 transition-colors"
+        >
+          Return to Shop
+        </Link>
       </main>
     );
   }
 
-  // Handle adding to cart and showing the popup
   const handleAddToCart = () => {
     addToCart(product, quantity);
     setShowToast(true);
-    
-    // Hide the popup after 3 seconds
-    setTimeout(() => {
-      setShowToast(false);
-    }, 3000);
+    setTimeout(() => { setShowToast(false); }, 3000);
   };
 
   return (
     <>
-      <main className="flex-1 max-w-[1400px] w-full mx-auto px-12 py-16 flex flex-col lg:flex-row gap-16 items-start relative">
-        
-        {/* Left Column: Large Image */}
-        <div className="w-full lg:w-1/2 shrink-0">
-          <div className="aspect-square bg-gray-100 rounded-[2rem] overflow-hidden shadow-sm border border-gray-100">
-            <img 
-              src={product.img} 
-              alt={product.name} 
-              className="w-full h-full object-cover hover:scale-105 transition-transform duration-700 ease-out" 
-            />
-          </div>
-        </div>
-
-        {/* Right Column: Product Information */}
-        <div className="w-full lg:w-1/2 flex flex-col py-6">
-          <span className="text-sm font-bold text-blue-600 tracking-widest uppercase mb-3">
-            {product.category}
-          </span>
-          <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight">
-            {product.name}
-          </h1>
-          <span className="text-3xl font-medium text-gray-800 mb-8">
-            {product.price}
-          </span>
+      {/* Full-width wrapper with top border to separate from Navbar */}
+      <div className="w-full bg-white border-t border-stone-200">
+        <main className="max-w-[1400px] mx-auto px-8 md:px-12 py-12 lg:py-16 flex flex-col lg:flex-row gap-12 lg:gap-20 items-stretch relative">
           
-          <p className="text-gray-600 mb-10 leading-relaxed text-lg">
-            High-quality, durable campus essential designed to make your daily routine smoother. Built for students, approved by EquipU.
-          </p>
-
-          {/* Quantity Selector */}
-          <div className="mb-10">
-            <span className="block text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
-              Quantity
-            </span>
-            <div className="flex items-center space-x-6">
-              <button 
-                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="w-12 h-12 rounded-full border-2 border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:border-gray-300 transition-colors text-xl font-medium"
-              >
-                -
-              </button>
-              <span className="text-2xl font-semibold w-8 text-center">{quantity}</span>
-              <button 
-                onClick={() => setQuantity(quantity + 1)}
-                className="w-12 h-12 rounded-full border-2 border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:border-gray-300 transition-colors text-xl font-medium"
-              >
-                +
-              </button>
+          {/* Left Column: Constrained Image */}
+          <div className="w-full lg:w-1/2 flex items-start justify-center">
+            {/* Base Image: 65vh tall */}
+            <div 
+              onClick={() => setIsFullscreen(true)}
+              className="w-full max-h-[65vh] bg-[#FAF9F6] overflow-hidden border border-stone-200 cursor-zoom-in group relative"
+            >
+              <img 
+                src={product.img} 
+                alt={product.name} 
+                className="w-full h-full object-cover max-h-[65vh] mix-blend-multiply group-hover:scale-[1.03] transition-transform duration-[1.5s] ease-[cubic-bezier(0.25,0.1,0.25,1)]" 
+              />
+              {/* Subtle hover hint */}
+              <div className="absolute inset-0 bg-stone-900/0 group-hover:bg-stone-900/[0.02] transition-colors duration-500 flex items-center justify-center">
+                <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-white/90 backdrop-blur-sm text-stone-900 text-[9px] uppercase tracking-widest px-4 py-2">
+                  Click to Enlarge
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 mt-auto">
-            <button 
-              onClick={handleAddToCart}
-              className="flex-1 bg-gray-900 text-white rounded-full py-4 px-8 font-semibold text-lg hover:bg-gray-800 transition-colors shadow-lg shadow-gray-900/20"
-            >
-              Add to Cart
-            </button>
-            <button 
-              onClick={() => setIsCartOpen(true)}
-              className="flex-1 bg-blue-600 text-white rounded-full py-4 px-8 font-semibold text-lg hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/30"
-            >
-              View Cart
-            </button>
+          {/* Right Column: Product Information */}
+          <div className="w-full lg:w-1/2 flex flex-col pt-4 lg:pt-8">
+            <span className="text-[10px] font-medium text-stone-500 tracking-[0.2em] uppercase mb-4 block">
+              {product.category}
+            </span>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif text-stone-900 mb-6 tracking-tighter leading-none">
+              {product.name}
+            </h1>
+            <span className="text-2xl font-sans text-stone-900 mb-10 block">
+              {product.price}
+            </span>
+            
+            <p className="text-stone-500 mb-12 leading-relaxed text-sm font-sans max-w-md">
+              High-quality, durable campus essential designed to make your daily routine smoother. Built for students, curated by EquipU to ensure form seamlessly meets function.
+            </p>
+
+            {/* Quantity Selector */}
+            <div className="mb-12">
+              <span className="block text-[9px] font-semibold text-stone-400 uppercase tracking-[0.2em] mb-4">
+                Quantity
+              </span>
+              <div className="flex items-center border border-stone-300 w-fit">
+                <button 
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  className="w-12 h-12 flex items-center justify-center text-stone-500 hover:bg-stone-50 hover:text-stone-900 transition-colors"
+                >
+                  <span className="text-lg leading-none mb-1">-</span>
+                </button>
+                <span className="w-12 text-center text-sm font-medium text-stone-900">{quantity}</span>
+                <button 
+                  onClick={() => setQuantity(quantity + 1)}
+                  className="w-12 h-12 flex items-center justify-center text-stone-500 hover:bg-stone-50 hover:text-stone-900 transition-colors"
+                >
+                  <span className="text-lg leading-none mb-0.5">+</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 mt-auto">
+              <button 
+                onClick={handleAddToCart}
+                className="flex-1 bg-stone-900 text-white py-4 px-8 text-[10px] uppercase tracking-[0.2em] font-medium hover:bg-black transition-colors duration-300"
+              >
+                Add to Cart
+              </button>
+              <button 
+                onClick={() => setIsCartOpen(true)}
+                className="flex-1 bg-transparent border border-stone-300 text-stone-900 py-4 px-8 text-[10px] uppercase tracking-[0.2em] font-medium hover:border-stone-900 transition-colors duration-300"
+              >
+                View Cart
+              </button>
+            </div>
           </div>
-        </div>
-        
-      </main>
+          
+        </main>
+      </div>
+
+      {/* Lightbox / Fullscreen Image Overlay */}
+      <div 
+        className={`fixed inset-0 z-[100] bg-stone-950/95 backdrop-blur-xl transition-opacity duration-500 flex items-center justify-center px-4 py-8 md:p-12 ${
+          isFullscreen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={() => setIsFullscreen(false)} // Close when clicking the dark background
+      >
+        <button 
+          onClick={(e) => { e.stopPropagation(); setIsFullscreen(false); }}
+          className="absolute top-6 right-6 md:top-8 md:right-8 text-stone-400 hover:text-white p-4 transition-colors group z-50"
+          aria-label="Close fullscreen"
+        >
+          <span className="text-[10px] uppercase tracking-[0.2em] font-medium mr-3 group-hover:opacity-100 opacity-0 transition-opacity">Close</span>
+          <svg className="w-6 h-6 inline-block transition-transform duration-500 group-hover:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+
+        {/* Enlarged Image: Explicitly taller (80-85vh) to guarantee it looks bigger than the 65vh page image */}
+        <img 
+          src={product.img} 
+          alt={product.name} 
+          onClick={(e) => e.stopPropagation()} // Prevent click from closing when clicking the image itself
+          className={`h-[80vh] md:h-[85vh] w-auto max-w-full object-contain shadow-2xl transition-transform duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] bg-[#FAF9F6] border border-stone-800 ${
+            isFullscreen ? 'scale-100' : 'scale-95'
+          }`} 
+        />
+      </div>
 
       {/* Toast Notification Popup */}
       <div 
-        className={`fixed bottom-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-2xl transition-all duration-300 z-50 flex items-center gap-3 ${
+        className={`fixed bottom-10 left-1/2 -translate-x-1/2 bg-stone-900 text-white px-8 py-4 shadow-2xl transition-all duration-500 z-50 flex items-center gap-4 ${
           showToast ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
         }`}
       >
-        <svg className="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-        </svg>
-        <span className="font-medium">Item added to cart</span>
+        <span className="text-[10px] uppercase tracking-[0.2em] font-medium">Added to your cart</span>
       </div>
     </>
   );

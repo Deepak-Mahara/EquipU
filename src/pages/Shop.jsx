@@ -7,19 +7,20 @@ export default function Shop() {
   const [isSortOpen, setIsSortOpen] = useState(false);
   const sortDropdownRef = useRef(null);
   
-  // Read current states from the URL
+  // Read current states from the URL, defaulting to Name: A to Z
   const activeCategory = searchParams.get("category") || "All Products";
-  const activeSort = searchParams.get("sort") || "recommended";
+  const activeSort = searchParams.get("sort") || "name-asc";
 
   const categories = [
     "All Products", "Hostel Essentials", "Electronics", "Stationery", "Trekking Essentials"
   ];
 
+  // Updated sort options replacing 'Recommended' with 'Name: Z to A'
   const sortOptions = [
-    { id: 'recommended', label: 'Recommended' },
+    { id: 'name-asc', label: 'Name: A to Z' },
+    { id: 'name-desc', label: 'Name: Z to A' },
     { id: 'price-asc', label: 'Price: Low to High' },
-    { id: 'price-desc', label: 'Price: High to Low' },
-    { id: 'name-asc', label: 'Name: A to Z' }
+    { id: 'price-desc', label: 'Price: High to Low' }
   ];
 
   // 1. Filter by Category
@@ -34,11 +35,13 @@ export default function Shop() {
 
     if (activeSort === 'price-asc') return priceA - priceB;
     if (activeSort === 'price-desc') return priceB - priceA;
-    if (activeSort === 'name-asc') return a.name.localeCompare(b.name);
-    return 0; // Default (Recommended) keeps original array order
+    if (activeSort === 'name-desc') return b.name.localeCompare(a.name);
+    
+    // Default fallback is Name: A to Z
+    return a.name.localeCompare(b.name); 
   });
 
-  // Smart URL parameter updating to preserve existing filters when sorting (and vice versa)
+  // Smart URL parameter updating
   const handleCategoryClick = (cat) => {
     const newParams = new URLSearchParams(searchParams);
     if (cat === "All Products") {
@@ -51,7 +54,8 @@ export default function Shop() {
 
   const handleSortClick = (sortId) => {
     const newParams = new URLSearchParams(searchParams);
-    if (sortId === "recommended") {
+    // If selecting the default sort, remove it from the URL to keep it clean
+    if (sortId === "name-asc") {
       newParams.delete("sort");
     } else {
       newParams.set("sort", sortId);
@@ -71,116 +75,137 @@ export default function Shop() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Find the active sort label for the UI
-  const currentSortLabel = sortOptions.find(opt => opt.id === activeSort)?.label || "Recommended";
+  const currentSortLabel = sortOptions.find(opt => opt.id === activeSort)?.label || "Name: A to Z";
 
   return (
-    <main className="flex-1 max-w-[1600px] w-full mx-auto px-12 py-10 flex gap-12">
-      
-      {/* Left Sidebar */}
-      <aside className="w-[20%] shrink-0 flex flex-col">
-        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6">Browse by</h3>
-        <ul className="flex flex-col space-y-4">
-          {categories.map((cat) => (
-            <li key={cat}>
-              <button 
-                onClick={() => handleCategoryClick(cat)}
-                className={`text-left w-full text-[15px] transition-colors duration-200 ${
-                  activeCategory === cat ? 'text-blue-600 font-semibold' : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                {cat}
-              </button>
-            </li>
-          ))}
-        </ul>
-      </aside>
+    <main className="flex-1 w-full bg-white border-t border-stone-200 min-h-[calc(100vh-88px)]">
+      <div className="max-w-[1600px] mx-auto px-8 md:px-12 flex flex-col md:flex-row items-stretch">
+        
+        {/* Left Sidebar - Architectural Vertical Column */}
+        <aside className="w-full md:w-56 shrink-0 flex flex-col pt-16 pr-8 md:pr-12 md:border-r border-stone-200">
+          <h3 className="text-[9px] font-semibold text-stone-400 uppercase tracking-[0.2em] mb-10">Categories</h3>
+          <ul className="flex flex-col space-y-5">
+            {categories.map((cat) => (
+              <li key={cat}>
+                {/* Custom Left-to-Right Underline Hover Interaction */}
+                <button 
+                  onClick={() => handleCategoryClick(cat)}
+                  className={`relative text-left w-fit text-[11px] uppercase tracking-[0.15em] transition-colors duration-300 pb-1 
+                    after:absolute after:bottom-0 after:left-0 after:h-[1px] after:bg-stone-900 after:transition-all after:duration-[400ms] after:ease-[cubic-bezier(0.25,0.1,0.25,1)]
+                    ${
+                    activeCategory === cat 
+                      ? 'text-stone-900 font-semibold after:w-full' 
+                      : 'text-stone-400 hover:text-stone-900 after:w-0 hover:after:w-full'
+                  }`}
+                >
+                  {cat}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </aside>
 
-      {/* Right Content Area */}
-      <section className="w-[80%] flex flex-col">
-        <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-200">
-          <div className="text-gray-500 font-medium text-sm">
-            Showing {displayedProducts.length} {displayedProducts.length === 1 ? 'Product' : 'Products'}
-          </div>
+        {/* Right Content Area */}
+        <section className="flex-1 flex flex-col min-w-0 md:pl-12 pt-12 md:pt-16 pb-24">
           
-          <div className="flex items-center space-x-6">
-            <button className="text-sm font-medium text-gray-600 hover:text-blue-600 flex items-center gap-2 transition-colors">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-              </svg>
-              Filters
-            </button>
+          {/* Top Header / Filters - Structural Horizontal Axis */}
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 pb-5 border-b border-stone-200 gap-4">
+            <div className="text-stone-500 font-sans text-xs tracking-wide">
+              Showing {displayedProducts.length} {displayedProducts.length === 1 ? 'Product' : 'Products'}
+            </div>
             
-            {/* Custom Sort Dropdown */}
-            <div className="relative" ref={sortDropdownRef}>
-              <button 
-                onClick={() => setIsSortOpen(!isSortOpen)}
-                className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors focus:outline-none"
-              >
-                <span>Sort by: {currentSortLabel}</span>
-                <svg className={`w-4 h-4 transition-transform duration-200 ${isSortOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            <div className="flex items-center space-x-8">
+              <button className="text-[10px] uppercase tracking-widest font-medium text-stone-500 hover:text-stone-900 flex items-center gap-2 transition-colors">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                 </svg>
+                Filter
               </button>
+              
+              {/* Custom Sort Dropdown */}
+              <div className="relative" ref={sortDropdownRef}>
+                <button 
+                  onClick={() => setIsSortOpen(!isSortOpen)}
+                  className="flex items-center gap-2 text-[10px] uppercase tracking-widest font-medium text-stone-500 hover:text-stone-900 transition-colors focus:outline-none"
+                >
+                  <span>Sort: {currentSortLabel}</span>
+                  <svg className={`w-3 h-3 transition-transform duration-300 ${isSortOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
 
-              {/* Dropdown Menu */}
-              <div 
-                className={`absolute right-0 mt-3 w-48 bg-white border border-gray-100 rounded-xl shadow-xl z-10 transition-all duration-200 origin-top-right ${
-                  isSortOpen ? 'opacity-100 scale-100 visible' : 'opacity-0 scale-95 invisible'
-                }`}
-              >
-                <div className="py-2">
-                  {sortOptions.map((option) => (
-                    <button
-                      key={option.id}
-                      onClick={() => handleSortClick(option.id)}
-                      className={`w-full text-left px-4 py-2 text-sm transition-colors ${
-                        activeSort === option.id 
-                          ? 'bg-blue-50 text-blue-600 font-semibold' 
-                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
+                {/* Dropdown Menu */}
+                <div 
+                  className={`absolute right-0 mt-4 w-52 bg-white border border-stone-200/80 shadow-xl shadow-stone-900/5 z-20 transition-all duration-300 origin-top-right ${
+                    isSortOpen ? 'opacity-100 scale-100 visible' : 'opacity-0 scale-95 invisible pointer-events-none'
+                  }`}
+                >
+                  <div className="py-2 flex flex-col">
+                    {sortOptions.map((option) => (
+                      <button
+                        key={option.id}
+                        onClick={() => handleSortClick(option.id)}
+                        className={`w-full text-left px-5 py-3 text-[10px] uppercase tracking-wider transition-colors ${
+                          activeSort === option.id 
+                            ? 'text-stone-900 bg-stone-50 font-medium' 
+                            : 'text-stone-400 hover:bg-stone-50 hover:text-stone-900'
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
-            
           </div>
-        </div>
 
-        {/* Product Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {displayedProducts.map((product) => (
-            <Link 
-              to={`/product/${product.id}`} 
-              key={product.id} 
-              className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group cursor-pointer block"
-            >
-              <div className="h-48 w-full bg-gray-100 overflow-hidden">
-                <img src={product.img} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-              </div>
-              <div className="p-5 flex flex-col h-[140px]">
-                <span className="text-xs font-semibold text-blue-500 mb-1">{product.category}</span>
-                <h4 className="text-gray-900 font-semibold text-lg mb-2 line-clamp-2">{product.name}</h4>
-                <div className="flex items-center justify-between mt-auto">
-                  <span className="text-gray-900 font-bold">{product.price}</span>
-                  <button className="w-8 h-8 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-600 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-colors">
-                    +
-                  </button>
+          {/* Product Grid - Framed Layout */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-6 gap-y-12">
+            {displayedProducts.map((product) => (
+              <Link 
+                to={`/product/${product.id}`} 
+                key={product.id} 
+                className="group cursor-pointer block"
+              >
+                {/* Image Frame - Warm paper tone against the pure white page */}
+                <div className="aspect-square w-full bg-[#FAF9F6] overflow-hidden border border-stone-200 mb-4 relative">
+                  <img 
+                    src={product.img} 
+                    alt={product.name} 
+                    className="w-full h-full object-cover mix-blend-multiply group-hover:scale-105 transition-transform duration-[1.5s] ease-[cubic-bezier(0.25,0.1,0.25,1)]" 
+                  />
+                  {/* Minimalist hover overlay */}
+                  <div className="absolute inset-0 bg-stone-900/0 group-hover:bg-stone-900/[0.02] transition-colors duration-500" />
                 </div>
+                
+                {/* Product Info - Flush Left Alignment */}
+                <div className="flex flex-col pr-2">
+                  <span className="text-[9px] uppercase tracking-widest text-stone-400 mb-1.5 block">
+                    {product.category}
+                  </span>
+                  <div className="flex flex-col gap-1">
+                    <h4 className="text-stone-900 font-serif text-base leading-tight line-clamp-2">
+                      {product.name}
+                    </h4>
+                    <span className="text-stone-500 font-sans text-sm tracking-wide mt-1">
+                      {product.price}
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+            
+            {displayedProducts.length === 0 && (
+              <div className="col-span-full py-32 text-center">
+                <span className="text-stone-400 font-serif italic text-xl">
+                  No products found matching your criteria.
+                </span>
               </div>
-            </Link>
-          ))}
-          
-          {displayedProducts.length === 0 && (
-            <div className="col-span-full py-12 text-center text-gray-500">
-              No products found matching your criteria.
-            </div>
-          )}
-        </div>
-      </section>
+            )}
+          </div>
+        </section>
+      </div>
     </main>
   );
 }
