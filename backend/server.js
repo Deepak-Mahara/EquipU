@@ -1,3 +1,4 @@
+
 // server.js
 const express = require('express');
 const mongoose = require('mongoose');
@@ -7,45 +8,82 @@ require('dotenv').config();
 const Product = require('./models/Product');
 
 const app = express();
-app.use(cors()); // Opens your API to your React frontend
-app.use(express.json()); // Allows the server to accept JSON data
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('Connected to MongoDB'))
-  .catch((err) => console.error('MongoDB connection error:', err));
+// Middleware
+app.use(cors({
+    origin: [
+        'http://localhost:5173',
+        process.env.FRONTEND_URL
+    ].filter(Boolean)
+}));
 
-// --- API ROUTES ---
+app.use(express.json());
 
-// GET: Fetch all products for the React frontend
+// Health check route
+app.get('/', (req, res) => {
+    res.send('EquipU API is running!');
+});
+
+app.get('/api/health', (req, res) => {
+    res.json({ status: 'OK' });
+});
+
+// GET: Fetch all products
 app.get('/api/products', async (req, res) => {
-  try {
-    const products = await Product.find();
-    
-    const formattedProducts = products.map(p => ({
-      id: p.productId,
-      name: p.name,
-      category: p.category,
-      price: `₹${p.price}`, // <-- CHANGE THIS LINE FROM '$' TO '₹'
-      img: p.img
-    }));
+    try {
+        const products = await Product.find();
 
-    res.json(formattedProducts);
-  } catch (error) {
-    res.status(500).json({ message: 'Server Error', error: error.message });
-  }
+        const formattedProducts = products.map(p => ({
+            id: p.productId,
+            name: p.name,
+            category: p.category,
+            price: `₹${p.price}`,
+            img: p.img
+        }));
+
+        res.json(formattedProducts);
+
+    } catch (error) {
+        res.status(500).json({
+            message: 'Server Error',
+            error: error.message
+        });
+    }
 });
 
-// Optional POST: Quick route to add a product via Postman/Insomnia
+// POST: Add a product
 app.post('/api/products', async (req, res) => {
-  try {
-    const newProduct = new Product(req.body);
-    const savedProduct = await newProduct.save();
-    res.status(201).json(savedProduct);
-  } catch (error) {
-    res.status(400).json({ message: 'Error adding product', error: error.message });
-  }
+    try {
+        const newProduct = new Product(req.body);
+        const savedProduct = await newProduct.save();
+
+        res.status(201).json(savedProduct);
+
+    } catch (error) {
+        res.status(400).json({
+            message: 'Error adding product',
+            error: error.message
+        });
+    }
 });
 
+// Connect MongoDB and start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+async function startServer() {
+    try {
+        await mongoose.connect(process.env.MONGO_URI);
+
+        console.log('Connected to MongoDB');
+
+        app.listen(PORT, '0.0.0.0', () => {
+            console.log(`Server running on port ${PORT}`);
+        });
+
+    } catch (error) {
+        console.error('MongoDB connection failed:', error);
+        process.exit(1);
+    }
+}
+
+startServer();

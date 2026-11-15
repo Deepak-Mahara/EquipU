@@ -17,7 +17,7 @@ export default function Product() {
   // NEW: Fetch products from backend and find the matching one
   useEffect(() => {
     setIsLoading(true);
-    fetch('http://localhost:5000/api/products')
+    fetch(`${import.meta.env.VITE_API_URL}/api/products`)
       .then(res => res.json())
       .then(data => {
         // Find the specific product matching the URL id
