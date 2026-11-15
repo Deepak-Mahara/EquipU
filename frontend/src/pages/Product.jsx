@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { mockProducts } from '../data/products';
 import { useCart } from '../context/CartContext';
 
 export default function Product() {
@@ -9,9 +8,28 @@ export default function Product() {
   const [showToast, setShowToast] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   
-  const { addToCart, setIsCartOpen } = useCart(); 
+  // NEW: State for fetching the specific product from the backend
+  const [product, setProduct] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   
-  const product = mockProducts.find(p => p.id === parseInt(id));
+  const { addToCart, setIsCartOpen } = useCart(); 
+
+  // NEW: Fetch products from backend and find the matching one
+  useEffect(() => {
+    setIsLoading(true);
+    fetch('http://localhost:5000/api/products')
+      .then(res => res.json())
+      .then(data => {
+        // Find the specific product matching the URL id
+        const foundProduct = data.find(p => p.id === parseInt(id));
+        setProduct(foundProduct);
+        setIsLoading(false);
+      })
+      .catch(error => {
+        console.error("Error fetching product:", error);
+        setIsLoading(false);
+      });
+  }, [id]);
 
   // Lock body scroll when lightbox is open
   useEffect(() => {
@@ -23,6 +41,16 @@ export default function Product() {
     return () => { document.body.style.overflow = 'auto'; };
   }, [isFullscreen]);
 
+  // NEW: Handle Loading State
+  if (isLoading) {
+    return (
+      <main className="flex-1 flex flex-col items-center justify-center py-32 bg-[#FAF9F6] border-t border-stone-200 w-full">
+        <span className="text-stone-400 font-serif italic text-xl mb-6">Loading product details...</span>
+      </main>
+    );
+  }
+
+  // Handle Not Found State
   if (!product) {
     return (
       <main className="flex-1 flex flex-col items-center justify-center py-32 bg-[#FAF9F6] border-t border-stone-200 w-full">
@@ -146,7 +174,7 @@ export default function Product() {
           </svg>
         </button>
 
-        {/* Enlarged Image: Explicitly taller (80-85vh) to guarantee it looks bigger than the 65vh page image */}
+        {/* Enlarged Image */}
         <img 
           src={product.img} 
           alt={product.name} 

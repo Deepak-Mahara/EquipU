@@ -8,6 +8,10 @@ import Shop from './pages/Shop';
 import Product from './pages/Product';
 import Checkout from './pages/Checkout'; // Import Checkout
 import CartDrawer from './components/CartDrawer';
+// Add this to your imports at the top
+import Orders from './pages/Orders';
+
+// Add this inside your <Routes>
 
 export default function App() {
   return (
@@ -21,6 +25,7 @@ export default function App() {
             <Route path="/shop" element={<Shop />} />
             <Route path="/product/:id" element={<Product />} />
             <Route path="/checkout" element={<Checkout />} /> {/* Add Checkout Route */}
+            <Route path="/orders" element={<Orders />} />
           </Routes>
           
           <Footer />

@@ -52,7 +52,7 @@ export default function Footer() {
         </div>
         {/* Stationery */}
         <div className="bg-stone-900 overflow-hidden relative">
-          <img src="https://images.unsplash.com/photo-1518826728974-f2a89360c707?q=80&w=600&auto=format&fit=crop" alt="Stationery" className="w-full h-full object-cover opacity-60 mix-blend-luminosity" />
+          <img src="https://www.study-horizon.com/static/images/blog/features/essay-exams.webp?q=80&w=600&auto=format&fit=crop" alt="Stationery" className="w-full h-full object-cover opacity-60 mix-blend-luminosity" />
           <span className="absolute bottom-4 left-4 text-[10px] uppercase tracking-widest text-white font-medium">Stationery</span>
         </div>
         {/* Electronics */}

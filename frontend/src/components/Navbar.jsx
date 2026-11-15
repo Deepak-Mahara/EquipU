@@ -23,7 +23,6 @@ export default function Navbar() {
     e.preventDefault();
     e.stopPropagation();
     
-    // Prevent spam clicking from messing up the animation
     if (isScrambling) return; 
     setIsScrambling(true);
 
@@ -33,9 +32,9 @@ export default function Navbar() {
     const interval = setInterval(() => {
       setLogoText(originalLogo.split("").map((letter, index) => {
         if (index < iterations) {
-          return originalLogo[index]; // Return correct letter
+          return originalLogo[index]; 
         }
-        return letters[Math.floor(Math.random() * 26)]; // Scramble
+        return letters[Math.floor(Math.random() * 26)]; 
       }).join(""));
       
       if (iterations >= originalLogo.length) {
@@ -43,7 +42,7 @@ export default function Navbar() {
         setIsScrambling(false);
       }
       
-      iterations += 1 / 4; // Controls the speed of the deciphering
+      iterations += 1 / 4; 
     }, 30);
   };
 
@@ -81,10 +80,8 @@ export default function Navbar() {
             </svg>
           </Link>
           
-          {/* Invisible hover bridge */}
           <div className="absolute top-full left-0 w-full h-2" />
 
-          {/* Dropdown Menu */}
           <div className="absolute top-[calc(100%+0.5rem)] left-1/2 -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 ease-out transform group-hover:translate-y-0 translate-y-2 z-50">
             <div className="w-56 bg-[#FAF9F6] border border-stone-200/60 shadow-xl shadow-stone-900/5 py-4">
               <div className="flex flex-col gap-1">
@@ -94,20 +91,12 @@ export default function Navbar() {
                     to={category === "All Products" ? "/shop" : `/shop?category=${encodeURIComponent(category)}`}
                     className="group/item flex items-center justify-between px-6 py-2 transition-colors"
                   >
-                    {/* Text with Left-to-Right Underline */}
                     <span className={`relative text-[10px] uppercase tracking-widest font-medium text-stone-500 group-hover/item:text-stone-900 transition-colors pb-0.5
                       after:absolute after:bottom-0 after:left-0 after:h-[1px] after:bg-stone-900 after:transition-all after:duration-[400ms] after:ease-[cubic-bezier(0.25,0.1,0.25,1)] after:w-0 group-hover/item:after:w-full
                     `}>
                       {category}
                     </span>
-                    
-                    {/* Animated Arrow */}
-                    <svg 
-                      className="w-3 h-3 text-stone-900 opacity-0 -translate-x-2 group-hover/item:opacity-100 group-hover/item:translate-x-0 transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]" 
-                      fill="none" 
-                      viewBox="0 0 24 24" 
-                      stroke="currentColor"
-                    >
+                    <svg className="w-3 h-3 text-stone-900 opacity-0 -translate-x-2 group-hover/item:opacity-100 group-hover/item:translate-x-0 transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 12h14M12 5l7 7-7 7" />
                     </svg>
                   </Link>
@@ -123,6 +112,14 @@ export default function Navbar() {
         >
           About
         </Link>
+
+        {/* NEW: Your Orders Link */}
+        <Link 
+          to="/orders" 
+          className="text-[11px] uppercase tracking-[0.2em] font-medium text-stone-500 hover:text-stone-900 transition-colors"
+        >
+          Your Orders
+        </Link>
       </div>
 
       {/* Right: Cart Icon */}
@@ -136,7 +133,6 @@ export default function Navbar() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
           </svg>
           
-          {/* Floating Number Badge */}
           {cartCount > 0 && (
             <span className="absolute -top-1 -right-1 w-4 h-4 flex items-center justify-center bg-stone-900 text-white text-[9px] font-medium rounded-full">
               {cartCount}
