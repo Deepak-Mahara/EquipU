@@ -3,9 +3,7 @@
 > **Empowering hostel life, one essential at a time.** 
 > EquipU is a purpose-built, full-stack e-commerce ecosystem designed exclusively for campus students. From midnight study snacks to weekend trekking gear, EquipU bridges the gap between campus isolation and essential accessibility.
 
-[![Frontend Deployment](https://equipu.vercel.app)]
-(#)[![Backend Deployment] (On render)]
-
+🌐 **Step into the EquipU campus experience:** [equipu.vercel.app](https://equipu.vercel.app)
 ---
 
 ## 🌟 The Vision
