@@ -3,13 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
 export default function CartDrawer() {
-  const { cartItems, updateQuantity, removeItem, cartTotal, isCartOpen, setIsCartOpen } = useCart();
+  // cartTotal is likely returning NaN from the context, so we'll ignore it and calculate safely here
+  const { cartItems, updateQuantity, removeItem, isCartOpen, setIsCartOpen } = useCart();
   const navigate = useNavigate();
 
   const handleCheckoutClick = () => {
     setIsCartOpen(false); // Close the drawer
     navigate('/checkout'); // Route to the checkout page
   };
+
+  // Safely parse string prices (e.g., "$85.00", "₹7,000.00") into raw numbers and sum them
+  const safeSubtotal = cartItems.reduce((total, item) => {
+    const numericPrice = parseFloat(String(item.price).replace(/[^0-9.-]+/g, "")) || 0;
+    return total + (numericPrice * item.quantity);
+  }, 0);
 
   return (
     <>
@@ -97,7 +104,8 @@ export default function CartDrawer() {
         <div className="border-t border-stone-200 p-8 bg-white">
           <div className="flex justify-between items-end mb-8">
             <span className="text-[11px] uppercase tracking-widest text-stone-500 font-semibold">Subtotal</span>
-            <span className="text-2xl font-serif text-stone-900">${cartTotal.toFixed(2)}</span>
+            {/* Hardcoded $ is left here from original code, you can change to ₹ if needed */}
+            <span className="text-2xl font-serif text-stone-900">₹{safeSubtotal.toFixed(2)}</span>
           </div>
           
           <div className="space-y-3">

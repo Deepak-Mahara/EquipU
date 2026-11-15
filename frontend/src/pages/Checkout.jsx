@@ -3,12 +3,18 @@ import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
 export default function Checkout() {
-  const { cartItems, cartTotal } = useCart();
+  const { cartItems } = useCart();
 
-  // Simple placeholders for tax and shipping calculations
-  const shipping = cartTotal > 0 ? 5.00 : 0;
-  const tax = cartTotal * 0.08;
-  const grandTotal = cartTotal + shipping + tax;
+  // Safely calculate the cart total from items to avoid NaN issues with formatted strings
+  const safeCartTotal = cartItems.reduce((total, item) => {
+    const numericPrice = parseFloat(String(item.price).replace(/[^0-9.-]+/g, "")) || 0;
+    return total + (numericPrice * item.quantity);
+  }, 0);
+
+  // Shipping is now free for all orders
+  const shipping = 0;
+  const tax = safeCartTotal * 0.08;
+  const grandTotal = safeCartTotal + shipping + tax;
 
   if (cartItems.length === 0) {
     return (
@@ -45,8 +51,8 @@ export default function Checkout() {
           
           <div className="divide-y divide-stone-200">
             {cartItems.map((item) => {
-              // Extract numeric price for calculation
-              const numericPrice = parseFloat(item.price.replace('$', ''));
+              // Safely extract numeric price handling commas and currency symbols
+              const numericPrice = parseFloat(String(item.price).replace(/[^0-9.-]+/g, "")) || 0;
               const rowTotal = numericPrice * item.quantity;
               
               return (
@@ -74,7 +80,7 @@ export default function Checkout() {
                   
                   {/* Row Total */}
                   <div className="col-span-1 sm:col-span-3 flex sm:justify-end">
-                    <span className="text-lg font-sans tracking-wide text-stone-900">${rowTotal.toFixed(2)}</span>
+                    <span className="text-lg font-sans tracking-wide text-stone-900">₹{rowTotal.toFixed(2)}</span>
                   </div>
                   
                 </div>
@@ -92,22 +98,22 @@ export default function Checkout() {
           <div className="space-y-4 mb-8 text-sm font-sans tracking-wide text-stone-600">
             <div className="flex justify-between items-center">
               <span>Subtotal</span>
-              <span className="text-stone-900">${cartTotal.toFixed(2)}</span>
+              <span className="text-stone-900">₹{safeCartTotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between items-center">
               <span>Estimated Tax (8%)</span>
-              <span className="text-stone-900">${tax.toFixed(2)}</span>
+              <span className="text-stone-900">₹{tax.toFixed(2)}</span>
             </div>
             <div className="flex justify-between items-center">
               <span>Shipping</span>
-              <span className="text-stone-900">${shipping.toFixed(2)}</span>
+              <span className="text-stone-900">Free</span>
             </div>
           </div>
           
           <div className="border-t border-stone-200 pt-6 mb-10">
             <div className="flex justify-between items-end">
               <span className="text-[11px] uppercase tracking-widest text-stone-500 font-medium mb-1">Grand Total</span>
-              <span className="text-3xl font-serif text-stone-900">${grandTotal.toFixed(2)}</span>
+              <span className="text-3xl font-serif text-stone-900">₹{grandTotal.toFixed(2)}</span>
             </div>
           </div>
 

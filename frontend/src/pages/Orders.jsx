@@ -1,25 +1,25 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-// Mock data representing confirmed orders after checkout
+// Mock data representing confirmed orders after checkout, updated to Rupees
 const mockOrders = [
   {
     id: "EQ-84729",
     date: "October 12, 2026",
-    total: "$115.00",
+    total: "₹2,400.00",
     status: "Delivered",
     items: [
-      { id: 1, name: "Noise Cancelling Headphones", category: "Electronics", quantity: 1, price: "$85.00", img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=600&auto=format&fit=crop" },
-      { id: 2, name: "Scientific Calculator", category: "Electronics", quantity: 1, price: "$30.00", img: "https://images.unsplash.com/photo-1574607407408-1e681c46041d?q=80&w=600&auto=format&fit=crop" }
+      { id: 1, name: "Noise Cancelling Headphones", category: "Electronics", quantity: 1, price: "₹1,900.00", img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=600&auto=format&fit=crop" },
+      { id: 2, name: "Scientific Calculator", category: "Electronics", quantity: 1, price: "₹500.00", img: "https://images.unsplash.com/photo-1574607407408-1e681c46041d?q=80&w=600&auto=format&fit=crop" }
     ]
   },
   {
     id: "EQ-73911",
     date: "September 04, 2026",
-    total: "$45.00",
+    total: "₹1,100.00",
     status: "Processing",
     items: [
-      { id: 3, name: "Mattress Topper", category: "Hostel Essentials", quantity: 1, price: "$45.00", img: "https://images.unsplash.com/photo-1631679706909-1844bbd07221?q=80&w=600&auto=format&fit=crop" }
+      { id: 3, name: "Mattress Topper", category: "Hostel Essentials", quantity: 1, price: "₹1100.00", img: "https://images.unsplash.com/photo-1631679706909-1844bbd07221?q=80&w=600&auto=format&fit=crop" }
     ]
   }
 ];
@@ -137,4 +137,3 @@ export default function Orders() {
     </main>
   );
 }
-
