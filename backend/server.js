@@ -1,5 +1,4 @@
 
-// server.js
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -9,17 +8,21 @@ const Product = require('./models/Product');
 
 const app = express();
 
-// Middleware
+// CORS Configuration
+const allowedOrigins = [
+    'http://localhost:5173',
+    'https://equipu.vercel.app'
+];
+
 app.use(cors({
-    origin: [
-        'http://localhost:5173',
-        process.env.FRONTEND_URL
-    ].filter(Boolean)
+    origin: allowedOrigins,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
 
-// Health check route
+// Health Check
 app.get('/', (req, res) => {
     res.send('EquipU API is running!');
 });
@@ -44,6 +47,8 @@ app.get('/api/products', async (req, res) => {
         res.json(formattedProducts);
 
     } catch (error) {
+        console.error('Error fetching products:', error);
+
         res.status(500).json({
             message: 'Server Error',
             error: error.message
